@@ -66,8 +66,8 @@
     const expenseByStatus = document.getElementById("expenseByStatus");
     const expenseByStatusDate = document.getElementById("expenseByStatusDate");
     const jwt = localStorage.getItem("jwt");
-    const decodedJWT = parseJWT(jwt);
-    const EmployeeId = decodedJWT.id;
+    // const decodedJWT = parseJWT(jwt);
+    // const EmployeeId = decodedJWT.id;
 
 
     function parseJWT (token) {
@@ -79,6 +79,9 @@
 
             return JSON.parse(jsonPayload);
     }  
+
+    const decodedJWT = parseJWT(jwt);
+    const EmployeeId = decodedJWT.id;
 
     async function createExpense(){
         const expenseAmountInput = document.getElementById("expenseAmount");
