@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <link href="managerexpenses.css" rel="stylesheet">
+
+
+    <title>Employee expenses administration</title>
+</head>
+<body>
+    <div id="title">    
+        <h3>Employee expenses administration</h3>
+    </div>
+
+    <div id="expensesearch">
+        <label for="expenseByStatus">Enter expense status</label>
+        <input id = "expenseByStatus", type = "text">
+        <button onclick="getExpenseByStatus()">Get Expenses</button>
+    </div>
+
+    <div id="expensesearch">
+        <label for="expenseByDateSubmitted">Enter expense submission date</label>
+        <input id = "expenseByDateSubmitted", type = "text">
+        <button onclick = "getExpenseByDateSubmitted()">Get Expenses</button>
+    </div>
+
+    <div id="expensesearch">
+        <label for="expenseByStatusDate">Enter expense status date</label>
+        <input id = "expenseByStatusDate", type = "text">
+        <button onclick = "getExpenseByStatusDate()">Get Expenses</button>
+    </div>
+
+    <div id="expensesearch">
+        <label for="expenseByEmployeeId">Enter employee ID</label>
+        <input id = "expenseByEmployeeId", type = "text">
+        <button onclick="getExpenseByEmployeeId()">Get Expenses</button>
+    </div>
+    
+    <div id="expensesearch">
+        <label for="expenseByStatusPerEmployee">Enter expense status</label>
+        <input id = "expenseByStatusPerEmployee", type = "text">
+        <label for="expenseEmployeeIdStatus">Enter employee ID</label>
+        <input id = "expenseEmployeeIdStatus", type = "text">
+        <button onclick="getExpensePerEmployeeByStatus()">Get Expenses</button>
+    </div>
+
+    <div id="expensesearch">
+        <label for="expenseByStatusDatePerEmployee">Enter expense status date</label>
+        <input id = "expenseByStatusDatePerEmployee", type = "text">
+        <label for="expenseEmployeeIdStatusDate">Enter employee ID</label>
+        <input id = "expenseEmployeeIdStatusDate", type = "text">
+        <button onclick="getExpensePerEmployeeByStatusDate()">Get Expenses</button>
+    </div>
+
+    <div id="expensesearch">
+        <label for="expenseBySubmissionDatePerEmployee">Enter expense submission date</label>
+        <input id = "expenseBySubmissionDatePerEmployee", type = "text">
+        <label for="expenseEmployeeIdSubmissionDate">Enter employee ID</label>
+        <input id = "expenseEmployeeIdSubmissionDate", type = "text">
+        <button onclick="getExpensePerEmployeeBySubmissionDate()">Get Expenses</button>
+    </div>
+    
+    <div id="expensesearch">
+        <button onclick="getAllExpenses()">All Expenses</button>
+    </div>
+    <div id="expenseresults">
+        <table id="expensetable">
+            <thead><tr><th>Expense ID</th><th>Expense amount</th><th>Reason</th><th>Date submitted</th><th>Employee ID</th><th>Manager ID</th><th>Status</th><th>Status Date</th><th>Manager Notes</th></tr>
+            </thead>        
+            <tbody id="expenseTableBody">
+
+            </tbody>
+        </table>
+    </div>
+
+    <div id="updateexpense">
+        <h6>Update expense information</h6>
+        <div>
+            <label for="expenseId">Enter expense ID</label>
+            <input id = "expenseId", type = "text">
+
+            <label for="expenseAmount">Expense amount</label>
+            <input id = "expenseAmount", type = "text">
+            
+            <label for="expenseReason">Expense reason</label>
+            <input id = "expenseReason", type = "text">
+
+            <label for="dateSubmitted">Date submitted</label>
+            <input id = "dateSubmitted", type = "text">
+
+            <label for="employeeId">Employee ID</label>
+            <input id = "employeeId", type = "text">
+            
+            <label for="managerId">Manager ID</label>
+            <input id = "managerId", type = "text">
+
+            <label for="expenseStatus">Select expense status</label>
+            <select name="expenseStatus" id="expenseStatus">
+                <option value="Approved">Approved</option>
+                <option value="Denied">Denied</option>
+              </select>
+
+            <label for="managerNotes">Enter notes</label>
+            <input id = "managerNotes", type = "text">
+
+            <label for="statusDate">Enter date</label>
+            <input id = "statusDate", type = "text">
+
+            <button id="updatebutton", onclick="updateExpense()">Update Expense</button>
+        </div>
+    </div>
+    <div id="logout">
+        <button id="logout", onclick="logout()">Log out</button>
+    </div>
+</body>
+<script>
+    const expenseTableBody = document.getElementById("expenseTableBody")
+    const expenseByDateSubmitted = document.getElementById("expenseByDateSubmitted")
+    const expenseByStatus = document.getElementById("expenseByStatus")
+    const expenseByStatusDate = document.getElementById("expenseByStatusDate")
+    const jwt = localStorage.getItem("jwt");
+    const decodedJWT = parseJWT(jwt);
+    const ManagerId = decodedJWT.id;
+
+
+    function parseJWT (token) {
+            var base64Url = token.split('.')[1];
+            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            return JSON.parse(jsonPayload);
+    }  
+
+    async function getAllExpenses(){
+
+        details = {
+            method:'GET', 
+            headers:{Authorization:jwt}
+        };
+
+        
+            const httpResponse = await fetch(`http://localhost:7000/expenses/manager/${ManagerId}`, details); 
+            const expenses = await httpResponse.json(); 
+
+            let tbodyHtml = "";
+
+            for(const expense of expenses){
+                tbodyHtml += `
+                <tr>
+                <td>${expense.expenseId}</td>
+                <td>${expense.expenseAmount}</td>
+                <td>${expense.reason}</td>
+                <td>${expense.dateSubmitted}</td>
+                <td>${expense.employeeId}</td>
+                <td>${expense.managerId}</td>
+                <td>${expense.status}</td>
+                <td>${expense.statusDate}</td>
+                <td>${expense.managerNotes}</td>
+                </tr>
+                `;
+
+                expenseTableBody.innerHTML = tbodyHtml;
+            }
+    }
+
+    async function getExpenseByEmployeeId(){
+
+        details = {
+            method:'GET', 
+            headers:{Authorization:jwt}
+        };
+
+        const expenseByEmployeeIdInput = document.getElementById("expenseByEmployeeId")
+        const expenseByEmployeeId = expenseByEmployeeIdInput.value;
+        const httpResponse = await fetch(`http://localhost:7000/expenses/manager/employee/${ManagerId}/${expenseByEmployeeId}`, details); 
+        const expenses = await httpResponse.json(); 
+
+        let tbodyHtml = "";
+        for (let expense of expenses){
+            tbodyHtml += `
+            <tr>
+                <tr>
+                <td>${expense.expenseId}</td>
+                <td>${expense.expenseAmount}</td>
+                <td>${expense.reason}</td>
+                <td>${expense.dateSubmitted}</td>
+                <td>${expense.employeeId}</td>
+                <td>${expense.managerId}</td>
+                <td>${expense.status}</td>
+                <td>${expense.statusDate}</td>
+                <td>${expense.managerNotes}</td>
+                </tr>
+            `;
+        }
+
+            expenseTableBody.innerHTML = tbodyHtml;
+}
+
+
+    async function getExpenseByStatus(){
+
+        details = {
+            method:'GET', 
+            headers:{Authorization:jwt}
+        };
+
+        const expenseByStatusInput = document.getElementById("expenseByStatus")
+        const status = expenseByStatusInput.value;
+        const httpResponse =  await fetch(`http://localhost:7000/expenses/manager/status/${ManagerId}/${status}`, details); 
+        const expenses = await httpResponse.json(); 
+
+        let tbodyHtml = "";
+        for (let expense of expenses){
+            tbodyHtml += `
+            <tr>
+                <tr>
+                <td>${expense.expenseId}</td>
+                <td>${expense.expenseAmount}</td>
+                <td>${expense.reason}</td>
+                <td>${expense.dateSubmitted}</td>
+                <td>${expense.employeeId}</td>
+                <td>${expense.managerId}</td>
+                <td>${expense.status}</td>
+                <td>${expense.statusDate}</td>
+                <td>${expense.managerNotes}</td>
+                </tr>
+            `;
+        }
+
+            expenseTableBody.innerHTML = tbodyHtml;
+        
+    }
+
+    async function getExpensePerEmployeeByStatus(){
+
+        details = {
+            method:'GET', 
+            headers:{Authorization:jwt}
+        };
+
+        const expensePerEmployeeByStatusInput = document.getElementById("expenseByStatusPerEmployee")
+        const status = expensePerEmployeeByStatusInput.value;
+        const employeeIdInput = document.getElementById("expenseEmployeeIdStatus")
+        const EmployeeId = employeeIdInput.value;
+        const httpResponse = await fetch(`http://localhost:7000/expenses/manager/employee/status/${ManagerId}/${EmployeeId}/${status}`, details); 
+        const expenses = await httpResponse.json(); 
+
+        let tbodyHtml = "";
+        for (let expense of expenses){
+            tbodyHtml += `
+            <tr>
+                <tr>
+                <td>${expense.expenseId}</td>
+                <td>${expense.expenseAmount}</td>
+                <td>${expense.reason}</td>
+                <td>${expense.dateSubmitted}</td>
+                <td>${expense.employeeId}</td>
+                <td>${expense.managerId}</td>
+                <td>${expense.status}</td>
+                <td>${expense.statusDate}</td>
+                <td>${expense.managerNotes}</td>
+                </tr>
+            `;
+        }
+
+            expenseTableBody.innerHTML = tbodyHtml;
+}
+
+    async function getExpenseByDateSubmitted(){
+
+        details = {
+            method:'GET', 
+            headers:{Authorization:jwt}
+        };
+
+        const expenseByDateSubmittedInput = document.getElementById("expenseByDateSubmitted")
+        const submitDate = expenseByDateSubmittedInput.value;
+        const httpResponse = await fetch(`http://localhost:7000/expenses/manager/submitdate/1/${submitDate}`, details); 
+        const expenses = await httpResponse.json(); 
+
+        let tbodyHtml = "";
+        for (let expense of expenses){
+            tbodyHtml += `
+            <tr>
+                <tr>
+                <td>${expense.expenseId}</td>
+                <td>${expense.expenseAmount}</td>
+                <td>${expense.reason}</td>
+                <td>${expense.dateSubmitted}</td>
+                <td>${expense.employeeId}</td>
+                <td>${expense.managerId}</td>
+                <td>${expense.status}</td>
+                <td>${expense.statusDate}</td>
+                <td>${expense.managerNotes}</td>
+                </tr>
+            `;
+        }
+
+            expenseTableBody.innerHTML = tbodyHtml;
+}
+
+async function getExpensePerEmployeeBySubmissionDate(){
+
+    details = {
+            method:'GET', 
+            headers:{Authorization:jwt}
+        };
+
+    const expensePerEmployeeBySubmissionDateInput = document.getElementById("expenseBySubmissionDatePerEmployee")
+    const submitDate = expensePerEmployeeBySubmissionDateInput.value;
+    const employeeIdInput = document.getElementById("expenseEmployeeIdSubmissionDate")
+    const EmployeeId = employeeIdInput.value;
+    const httpResponse = await fetch(`http://localhost:7000/expenses/manager/employee/submitdate/${ManagerId}/${EmployeeId}/${submitDate}`, details); 
+    const expenses = await httpResponse.json(); 
+
+    let tbodyHtml = "";
+
+    for (let expense of expenses){
+
+        tbodyHtml += `
+        <tr>
+            <tr>
+                <td>${expense.expenseId}</td>
+                <td>${expense.expenseAmount}</td>
+                <td>${expense.reason}</td>
+                <td>${expense.dateSubmitted}</td>
+                <td>${expense.employeeId}</td>
+                <td>${expense.managerId}</td>
+                <td>${expense.status}</td>
+                <td>${expense.statusDate}</td>
+                <td>${expense.managerNotes}</td>
+                </tr>
+        `;
+    }
+
+    expenseTableBody.innerHTML = tbodyHtml;
+}
+
+async function getExpenseByStatusDate(){
+
+    details = {
+            method:'GET', 
+            headers:{Authorization:jwt}
+        };
+
+    const expenseByStatusDateInput = document.getElementById("expenseByStatusDate")
+    const statusDate = expenseByStatusDateInput.value;
+    const httpResponse = await fetch(`http://localhost:7000/expenses/manager/statusdate/${ManagerId}/${statusDate}`, details); 
+    const expenses = await httpResponse.json(); 
+
+    let tbodyHtml = "";
+    for (let expense of expenses){
+        tbodyHtml += `
+        <tr>
+            <tr>
+                <td>${expense.expenseId}</td>
+                <td>${expense.expenseAmount}</td>
+                <td>${expense.reason}</td>
+                <td>${expense.dateSubmitted}</td>
+                <td>${expense.employeeId}</td>
+                <td>${expense.managerId}</td>
+                <td>${expense.status}</td>
+                <td>${expense.statusDate}</td>
+                <td>${expense.managerNotes}</td>
+                </tr>
+        `;
+    }
+
+        expenseTableBody.innerHTML = tbodyHtml;
+}
+
+async function getExpensePerEmployeeByStatusDate(){
+
+    details = {
+            method:'GET', 
+            headers:{Authorization:jwt}
+        };
+
+    const expensePerEmployeeByStatusDateInput = document.getElementById("expenseByStatusDatePerEmployee")
+    const statusDate = expensePerEmployeeByStatusDateInput.value;
+    const employeeIdInput = document.getElementById("expenseEmployeeIdStatusDate")
+    const EmployeeId = employeeIdInput.value;
+    const httpResponse = await fetch(`http://localhost:7000/expenses/manager/employee/statusdate/${ManagerId}/${EmployeeId}/${statusDate}`, details); 
+    const expenses = await httpResponse.json(); 
+
+    let tbodyHtml = "";
+    for (let expense of expenses){
+        tbodyHtml += `
+        <tr>
+                <td>${expense.expenseId}</td>
+                <td>${expense.expenseAmount}</td>
+                <td>${expense.reason}</td>
+                <td>${expense.dateSubmitted}</td>
+                <td>${expense.employeeId}</td>
+                <td>${expense.managerId}</td>
+                <td>${expense.status}</td>
+                <td>${expense.statusDate}</td>
+                <td>${expense.managerNotes}</td>
+                </tr>
+        `;
+    }
+        expenseTableBody.innerHTML = tbodyHtml;
+}
+
+
+async function updateExpense(){
+
+
+        const expenseIdInput = document.getElementById("expenseId");
+        const expenseId = expenseIdInput.value;
+        const expenseAmountInput = document.getElementById("expenseAmount");
+        const expenseAmount = expenseAmountInput.value;
+        const expenseReasonInput = document.getElementById("expenseReason");
+        const expenseReason = expenseReasonInput.value;
+        const expenseDateSubmittedInput = document.getElementById("dateSubmitted");
+        const dateSubmitted = expenseDateSubmittedInput.value;
+        const expenseEmployeeIdInput = document.getElementById("employeeId");
+        const employeeId = expenseEmployeeIdInput.value;
+        const expenseManagerIdInput = document.getElementById("managerId");
+        const managerId = expenseManagerIdInput.value;
+
+
+        const expenseStatusInput = document.getElementById("expenseStatus");
+        const expenseStatus = expenseStatusInput.value;
+        const expenseStatusDateInput = document.getElementById("statusDate");
+        const expenseStatusDate = expenseStatusDateInput.value;
+        const managerNotesInput = document.getElementById("managerNotes");
+        const managerNotes = managerNotesInput.value;
+    
+
+
+        const expense = {
+            expenseId:expenseId,
+            expenseAmount:expenseAmount,
+            reason:expenseReason,
+            dateSubmitted:dateSubmitted,
+            employeeId:employeeId,
+            managerId:managerId,
+            status: expenseStatus,
+            statusDate: expenseStatusDate,
+            managerNotes: managerNotes
+        }
+        const details ={
+            method:"PUT",
+            headers:{Authorization:jwt},
+            body:JSON.stringify(expense)
+        } 
+
+        console.log(details.body);
+        
+        const httpResponse = await fetch(`http://localhost:7000/expenses/${expenseId}`, details);
+
+        if(httpResponse.status === 200){
+        alert("Your expense was updated");
+        }else{
+            alert("Error! please try again");
+        }
+    }
+
+    async function logout(){
+        const jwt = localStorage.getItem("jwt");
+        const decodedJWT = parseJWT(jwt);
+
+        let logout = true;
+
+        if(logout){
+            window.location.href = "./login.html";
+        }
+
+    }
+
+</script>
+</html>

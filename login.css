@@ -1,0 +1,12 @@
+body {
+    background-image: url(burnbook2.jpg)
+
+  }
+
+#title{
+    color: rgb(242, 242, 250);
+}
+#login{
+    color: rgb(242, 242, 250);
+    font-weight: 1000;
+}

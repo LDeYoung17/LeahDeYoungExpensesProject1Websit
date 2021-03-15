@@ -1,0 +1,38 @@
+body {
+    background-image: url(reginageorge.jpeg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    min-width: 100vw;
+    min-height: 100vh;
+    background-attachment: fixed;
+  }
+
+  #title{
+    color: rgb(242, 242, 250);
+    font-weight: 1000;
+}
+
+#expensesearch{
+    color: rgb(242, 242, 250);
+    font-weight: 1000;
+}
+
+#expensesearch{
+    color: rgb(242, 242, 250);
+    font-weight: 1000;
+}
+
+#expenseresults{
+    color: rgb(242, 242, 250);
+    font-weight: 1000;
+}
+
+#expensetable{
+    color: rgb(242, 242, 250);
+    font-weight: 1000;
+}
+
+#updateexpense{
+    color: rgb(242, 242, 250);
+    font-weight: 1000;
+}

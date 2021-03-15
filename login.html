@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <link href="login.css" rel="stylesheet">
+    <title>Log In</title>
+</head>
+<body>
+    <div id="loginpage">
+        <div id="title">
+            <h2>Log In Page</h2>
+            <h4>Are you worthy of the secrets of the burn book?</h4>
+        </div>
+        <div id="login">
+            <label for="username">Enter Username</label>
+            <input id ="username", type="text" required="required">
+        </div>
+        <div id="login">
+            <label for="password">Enter Password</label>
+            <input id="password", type="password" required="required">
+        </div>
+        <div id="loginbutton">
+            <button onclick = "login()">Log In</button>
+        </div>
+    </div>
+    
+
+</body>
+<script>
+        function parseJWT (token) {
+            var base64Url = token.split('.')[1];
+            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            return JSON.parse(jsonPayload);
+    }  
+
+
+    async function login(){
+
+        const usernameInput = document.getElementById("username")
+        const username = usernameInput.value;
+        const passwordInput = document.getElementById("password")
+        const password = passwordInput.value;
+
+        const login = {
+            username:username,
+            password:password
+        }
+
+        const json = JSON.stringify(login);
+
+        const details ={
+            method:"POST",
+            body:JSON.stringify(login)
+        } 
+
+        const httpResponse = await fetch("http://localhost:7000/users/login", details);
+        const jwt = await httpResponse.text();
+        console.log(jwt);
+        decodedJWT = parseJWT(jwt);
+        localStorage.setItem("jwt",jwt);
+        redirect();
+      
+    }
+    async function redirect(){
+        const jwt = localStorage.getItem("jwt");
+        const decodedJWT = parseJWT(jwt);
+
+        if(decodedJWT.role === "Manager"){
+            window.location.href = "./managerexpenses.html";
+
+        }else if(decodedJWT.role === "Employee"){
+            window.location.href = "./employeeexpense.html";
+
+        }
+    }
+
+
+
+
+
+    
+ 
+
+</script>
+</html>

@@ -1,0 +1,13 @@
+body {
+    background-image: url(karensmith.jpg);
+    background-repeat: no-repeat;
+            background-size: cover;
+            min-width: 100vw;
+            min-height: 100vh;
+            background-attachment: fixed;
+
+  }
+#resultstable{
+    color: rgb(242, 242, 250);
+    font-weight: 1000;
+}
